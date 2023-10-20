@@ -32,7 +32,7 @@ jobs:
            
     - name: Build the QRCodeViewer Docker image
       run: |
-         docker build --file ./static/Dockerfile --tag ghcr.io/ucl-casa-ce/sjg/ucl-seats-qrcode-viewer:latest .
+         docker build --file ./Dockerfile --tag ghcr.io/ucl-casa-ce/sjg/ucl-seats-qrcode-viewer:latest .
          docker push ghcr.io/ucl-casa-ce/sjg/ucl-seats-qrcode-viewer:latest
     
 
