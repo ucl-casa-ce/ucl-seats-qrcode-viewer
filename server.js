@@ -116,20 +116,22 @@ app.get('/schedule', function(req, res) {
             //console.table(validSessions);
 
             if(validSessions.length != 0){
+                var nextSession = "";
+                                
                 if(schedule.length >= lastIndex){
                     if(schedule[lastIndex+1] != undefined){
-                        var nextSession = schedule[lastIndex+1][2] + " @ " + schedule[lastIndex+1][0].format("DD-MM-YYYY HH:mm:ss");
+                        nextSession = schedule[lastIndex+1][2] + " @ " + schedule[lastIndex+1][0].format("DD-MM-YYYY HH:mm:ss");
                     }else{
-                        var nextSession = "No more classes in database";
+                        nextSession = "No more classes in database";
                     }
                 }else{
-                    var nextSession = "No more classes in database";
+                    nextSession = "No more classes in database";
                 }
 
                 QRCode.toDataURL(validSessions[0][3], qr_opts, function (err, url) {
                     res.render('./pages/session.ejs', {
                         year: data.year,
-                        course: " - " + validSessions[0][2].replace("-"," ") + " - " + schedule[lastIndex+1][0].format("DD/MM/YYYY HH:mm"),
+                        course: " - " + validSessions[0][2].replace("-"," ") + " - " + schedule[lastIndex][0].format("DD/MM/YYYY HH:mm"),
                         class_code: validSessions[0][3],
                         qrcode: url,
                         server_time: nowDT.format("DD-MM-YYYY HH:mm:ss"),
