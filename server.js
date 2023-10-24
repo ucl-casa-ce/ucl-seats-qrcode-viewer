@@ -112,8 +112,8 @@ app.get('/schedule', function(req, res) {
                 lastIndex = nextIndex - 1;
             }
 
-            console.table(schedule);
-            console.table(validSessions);
+            //console.table(schedule);
+            //console.table(validSessions);
 
             if(validSessions.length != 0){
                 if(schedule.length >= lastIndex){
