@@ -30,7 +30,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
            
-    - name: Build the QRCodeViewer Docker image
+    - name: Build the Website Docker image
       run: |
          docker build --file ./Dockerfile --tag ghcr.io/ucl-casa-ce/sjg/ucl-seats-qrcode-viewer:latest .
          docker push ghcr.io/ucl-casa-ce/sjg/ucl-seats-qrcode-viewer:latest
