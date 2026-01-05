@@ -36,6 +36,7 @@ const appKey = process.env.GOOGLE_API_KEY;
 const sheetKey = process.env.GOOGLE_SHEETS_KEY;
 
 const sheets_url = "https://sheets.googleapis.com/v4/spreadsheets/"+sheetKey+"/values/CE?alt=json&key="+appKey;
+console.log("Using Sheets URL: " + sheets_url);
 
 var data ={
     year: new Date().getFullYear(),
@@ -67,11 +68,11 @@ app.get('/schedule', function(req, res) {
     let options = {json: true};
     request(sheets_url, options, (error, res_req, body) => {
         if (error) {
-            return  console.log(error)
             res.send('');
+            return  console.log(error)
         };
 
-        if (!error && res_req.statusCode == 200) {
+        if (!error && res_req.statusCode === 200) {
             // do something with JSON, using the 'body' variable
             var schedule = body.values;
 
@@ -106,18 +107,21 @@ app.get('/schedule', function(req, res) {
                 if(element[0].isSameOrBefore(nowDT)){
                     nextIndex = i;
                 }
+
+                //console.log(element[0].format("DD-MM-YYYY HH:mm:ss"));
             });
                        
             if(lastIndex == 0 && nextIndex > lastIndex){
                 lastIndex = nextIndex - 1;
             }
 
+            //console.log();
             //console.table(schedule);
             //console.table(validSessions);
 
             if(validSessions.length != 0){
                 var nextSession = "";
-                                
+
                 if(schedule.length >= lastIndex){
                     if(schedule[lastIndex+1] != undefined){
                         nextSession = schedule[lastIndex+1][2] + " @ " + schedule[lastIndex+1][0].format("DD-MM-YYYY HH:mm:ss");
@@ -128,18 +132,27 @@ app.get('/schedule', function(req, res) {
                     nextSession = "No more classes in database";
                 }
 
-                QRCode.toDataURL(validSessions[0][3], qr_opts, function (err, url) {
+                var display_class_code = parseInt(validSessions[0][3]);
+
+                if (isNaN(display_class_code)) {
+                    display_class_code = 0;
+                }
+
+                if(display_class_code.toString().length < 6){
+                    display_class_code = display_class_code.toString().padStart(6, '0');
+                }
+
+                QRCode.toDataURL(display_class_code.toString(), qr_opts, function (err, url) {
                     res.render('./pages/session.ejs', {
                         year: data.year,
                         course: " - " + validSessions[0][2].replace("-"," ") + " - " + schedule[lastIndex][0].format("DD/MM/YYYY HH:mm"),
-                        class_code: validSessions[0][3],
+                        class_code: display_class_code.toString(),
                         qrcode: url,
                         server_time: nowDT.format("DD-MM-YYYY HH:mm:ss"),
                         next_session: nextSession,
                     });
                 });
             }else{
-
                 if(schedule.length >= nextIndex){
                     if(schedule[nextIndex+1] != undefined){
                         var nextSession = schedule[nextIndex+1][2] + " @ " + schedule[nextIndex+1][0].format("DD-MM-YYYY HH:mm:ss");
@@ -170,22 +183,44 @@ app.get('/schedule', function(req, res) {
 });
 
 app.get('/:course/:class_code', function(req, res){
+
+    var display_class_code = parseInt(req.params.class_code);
+
+    if (isNaN(display_class_code)) {
+        display_class_code = 0;
+    }
+
+    if(display_class_code.toString().length < 6){
+        display_class_code = display_class_code.toString().padStart(6, '0');
+    }
+
     QRCode.toDataURL(req.params.class_code, qr_opts, function (err, url) {
         res.render('./pages/index.ejs', {
             year: data.year,
-            course: " - " + req.params.course.replace("-"," "),
-            class_code: req.params.class_code,
+            course: " - " + req.params.course.replace("-"," ").toUpperCase(),
+            class_code: display_class_code,
             qrcode: url
         });
     });
 });
 
 app.get('/:class_code', function(req, res){
+
+    var display_class_code = parseInt(req.params.class_code);
+
+    if (isNaN(display_class_code)) {
+        display_class_code = 0;
+    }
+
+    if(display_class_code.toString().length < 6){
+        display_class_code = display_class_code.toString().padStart(6, '0');
+    }
+
     QRCode.toDataURL(req.params.class_code, qr_opts, function (err, url) {
         res.render('./pages/index.ejs', {
             year: data.year,
             course: "",
-            class_code: req.params.class_code,
+            class_code: display_class_code,
             qrcode: url
         });
     });
@@ -194,13 +229,6 @@ app.get('/:class_code', function(req, res){
 app.get('/health', function(req, res) {
     res.send('1');
 });
-
-function convertToTitleCase(str) {
-    if (!str) {
-        return ""
-    }
-    return str.toLowerCase().replace(/\b\w/g, s => s.toUpperCase());
-  }
 
 app.listen(8080);
 console.log('Server is listening on port 8080');
