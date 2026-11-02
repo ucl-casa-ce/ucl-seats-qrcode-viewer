@@ -1,5 +1,5 @@
 # Use Alpine (a lightweight linux image)
-FROM alpine
+FROM node:lts-alpine
 
 # Install node and npm for later use
 RUN apk add --update nodejs npm
